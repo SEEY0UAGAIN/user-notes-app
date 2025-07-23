@@ -1,0 +1,148 @@
+<%- include('layout', { body: `
+<h2 class="mb-4 text-primary d-flex align-items-center gap-2">
+  <i class="bi bi-card-list"></i> Your Notes
+</h2>
+
+<!-- ปุ่ม Toggle แสดง/ซ่อนฟอร์ม -->
+<button
+  class="btn btn-success mb-2 d-flex align-items-center gap-2"
+  id="toggleFormBtn"
+>
+  <i class="bi bi-plus-lg"></i> Add Note
+</button>
+
+<!-- ฟอร์มที่ซ่อนอยู่ -->
+<form
+  method="POST"
+  action="/add"
+  class="mb-2 shadow p-4 rounded bg-light"
+  id="noteForm"
+  style="max-height: 0; opacity: 0; overflow: hidden; pointer-events: none"
+>
+  <div class="mb-3">
+    <input name="title" placeholder="Title" required class="form-control" />
+  </div>
+  <div class="mb-3">
+    <textarea
+      name="content"
+      placeholder="Your note..."
+      required
+      class="form-control"
+      rows="4"
+    ></textarea>
+  </div>
+  <button class="btn btn-primary d-flex align-items-center gap-2">
+    <i class="bi bi-save"></i> Add Note
+  </button>
+</form>
+
+<ul class="list-unstyled">
+  ${notes.map(note => `
+  <li
+    class="note-card mb-3 p-3 rounded shadow-sm d-flex justify-content-between align-items-start ${note.done ? 'done' : ''}"
+  >
+    <div class="me-3 flex-grow-1">
+      <div
+        class="fw-bold fs-5 mb-1 ${note.done ? 'text-decoration-line-through' : ''}"
+      >
+        ${note.title}
+      </div>
+      <div class="mb-2">${note.content}</div>
+
+      <!-- ฟอร์ม Edit (inline ซ่อนอยู่) -->
+      <form
+        method="POST"
+        action="/edit/${note._id}"
+        class="mt-2 edit-form"
+        id="edit-form-${note._id}"
+        style="display: none"
+      >
+        <input
+          type="text"
+          name="title"
+          value="${note.title}"
+          class="form-control mb-2"
+          required
+        />
+        <textarea name="content" class="form-control mb-2" rows="2" required>
+${note.content}</textarea
+        >
+        <button class="btn btn-primary btn-sm d-flex align-items-center gap-2">
+          <i class="bi bi-save"></i> Save
+        </button>
+      </form>
+    </div>
+
+    <!-- ปุ่มแบบ inline -->
+    <div class="d-flex flex-row gap-2">
+      <!-- ปุ่ม Edit -->
+      ${!note.done ? `
+      <button
+        class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1"
+        onclick="toggleEditForm('${note._id}')"
+        title="Edit"
+      >
+        <i class="bi bi-pencil"></i>
+      </button>
+      ` : ''}
+
+      <!-- ปุ่ม Done -->
+      ${!note.done ? `
+      <form method="POST" action="/done/${note._id}">
+        <button
+          class="btn btn-outline-success btn-sm d-flex align-items-center gap-1"
+          title="Mark as done"
+        >
+          <i class="bi bi-check-lg"></i>
+        </button>
+      </form>
+      ` : ''}
+
+      <!-- ปุ่ม Delete -->
+      <form method="POST" action="/delete/${note._id}">
+        <button
+          class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1"
+          title="Delete"
+        >
+          <i class="bi bi-trash"></i>
+        </button>
+      </form>
+    </div>
+  </li>
+  `).join('')}
+</ul>
+
+<style>
+  .note-card {
+    background-color: #f5f5f5; /* เทาอ่อน */
+  }
+
+  .note-card.done {
+    background-color: #d6d6d6; /* เทาเข้มกว่าเล็กน้อยสำหรับโน้ตที่ทำเสร็จ */
+  }
+</style>
+<!-- JavaScript สำหรับ toggle ฟอร์ม -->
+<script>
+  const toggleBtn = document.getElementById("toggleFormBtn");
+  const form = document.getElementById("noteForm");
+
+  toggleBtn.addEventListener("click", () => {
+    if (form.classList.contains("visible")) {
+      form.classList.remove("visible");
+      form.classList.add("hidden");
+    } else {
+      form.classList.remove("hidden");
+      form.classList.add("visible");
+    }
+  });
+
+  function toggleEditForm(id) {
+    const form = document.getElementById("edit-form-" + id);
+    if (form.style.display === "none" || form.style.display === "") {
+      form.style.display = "block";
+    } else {
+      form.style.display = "none";
+    }
+  }
+</script>
+` }) %>
